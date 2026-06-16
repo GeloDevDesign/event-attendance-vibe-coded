@@ -1,6 +1,6 @@
 import type { JSX } from "react";
-import { Link } from "react-router-dom";
 import type { EventRecord } from "../types/event.types";
+import { PixelButton } from "../../../components/PixelButton";
 
 export interface EventCardProps {
   event: EventRecord;
@@ -14,32 +14,30 @@ export function EventCard(props: EventCardProps): JSX.Element {
   const canRegister = props.canRegister ?? true;
 
   return (
-    <article className="grid gap-3 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="grid gap-3 border-4 border-black bg-white p-5 shadow-[4px_4px_0_0_#000]">
+      {event.imageUrl ? (
+        <div className="border-4 border-black bg-[#111] overflow-hidden flex items-center justify-center h-32 mb-2">
+          <img src={event.imageUrl} alt={event.name} className="w-full h-full object-cover [image-rendering:pixelated]" />
+        </div>
+      ) : null}
       <header>
-        <p className="text-xs font-black uppercase tracking-wider text-emerald-700">
+        <p className="text-[10px] font-black uppercase tracking-wider text-[#3db5e6] mb-2" style={{ textShadow: "1px 1px 0 #000" }}>
           {event.status}
         </p>
-        <h3 className="text-2xl font-black text-slate-950">{event.name}</h3>
+        <h3 className="text-xl text-black uppercase drop-shadow-[1px_1px_0_#fff]">{event.name}</h3>
       </header>
-      <p className="text-slate-600">{event.locationName}</p>
-      <p className="text-sm text-slate-600">
-        {new Date(event.eventDate).toLocaleDateString()} | Capacity{" "}
-        {event.maximumParticipants}
+      <p className="text-[10px] text-stone-600 leading-relaxed uppercase">{event.locationName}</p>
+      <p className="text-[10px] text-stone-600 leading-relaxed">
+        {new Date(event.eventDate).toLocaleDateString()} | CAP {event.maximumParticipants}
       </p>
-      <div className="flex flex-wrap gap-2">
-        <Link
-          className="rounded-md bg-emerald-950 px-4 py-2 text-sm font-bold text-white"
-          to={viewHref}
-        >
-          View
-        </Link>
+      <div className="flex flex-wrap gap-2 mt-2">
+        <PixelButton variant="secondary" to={viewHref} className="!w-auto !min-h-[40px] !px-4">
+          VIEW
+        </PixelButton>
         {canRegister && event.status === "open" ? (
-          <Link
-            className="rounded-md border border-emerald-950 px-4 py-2 text-sm font-bold text-emerald-950"
-            to={`/events/${event.id}/register`}
-          >
-            Register
-          </Link>
+          <PixelButton variant="primary" to={`/events/${event.id}/register`} className="!w-auto !min-h-[40px] !px-4">
+            JOIN
+          </PixelButton>
         ) : null}
       </div>
     </article>

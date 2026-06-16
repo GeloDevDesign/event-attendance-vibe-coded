@@ -201,20 +201,39 @@ export const getAttendanceByRegistration = query({
   },
 });
 
-export const listAttendanceByEvent = query({
+export const listPublicAttendanceByEvent = query({
   args: { eventId: v.id("events") },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
-    if (user.role !== "admin") {
-      throw new Error("Admin access is required.");
+    if (!user) {
+      return [];
     }
 
     const attendanceRecords = await ctx.db
       .query("attendanceRecords")
-      .withIndex("by_eventId", (queryBuilder) => queryBuilder.eq("eventId", args.eventId))
+      .withIndex("by_eventId_and_isPresent", (queryBuilder) => queryBuilder.eq("eventId", args.eventId).eq("isPresent", true))
       .take(100);
 
-    return attendanceRecords.map(toAttendanceRecord);
+    const results = [];
+    for (const record of attendanceRecords) {
+      const registration = await ctx.db.get(record.registrationId);
+      if (!registration) continue;
+      
+      const character = await ctx.db.get(registration.characterId);
+      if (!character) continue;
+
+      results.push({
+        id: record._id,
+        userId: record.userId,
+        latitude: record.latitude,
+        longitude: record.longitude,
+        firstName: registration.firstName,
+        lastName: registration.lastName,
+        characterImageUrl: character.imageUrl,
+      });
+    }
+
+    return results;
   },
 });
 

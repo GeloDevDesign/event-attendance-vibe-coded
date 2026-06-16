@@ -18,6 +18,7 @@ const demoEvents = [
     latitude: 14.5826,
     longitude: 120.9787,
     radiusMeters: 120,
+    imageUrl: "/rizal-shrine.png",
   },
   {
     name: "Demo Event: Intramuros Walk",
@@ -25,6 +26,15 @@ const demoEvents = [
     latitude: 14.5942,
     longitude: 120.9709,
     radiusMeters: 120,
+    imageUrl: "/intramuros-removebg-preview.png",
+  },
+  {
+    name: "Demo Event: The Pop Up Katipunan",
+    locationName: "The Pop Up Katipunan, Quezon City",
+    latitude: 14.633674587379092,
+    longitude: 121.07353627681734,
+    radiusMeters: 120,
+    imageUrl: "/popup.png",
   },
 ] as const;
 
@@ -77,6 +87,9 @@ const demoEmails = [
   "demo.admin@example.com",
   ...demoAttendees.map((attendee) => attendee.email),
 ];
+
+// We will keep this exported if needed by tests, but prefix with _ to ignore unused warning if unused
+export const _demoEmails = demoEmails;
 
 function toRadians(value: number) {
   return (value * Math.PI) / 180;
@@ -201,6 +214,47 @@ export const seedDefaultData = mutation({
   },
 });
 
+export const clearAuthAndUsers = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // This deletes ALL auth records and user records to fix InvalidAccountId
+    const authSessions = await ctx.db.query("authSessions").collect();
+    for (const session of authSessions) await ctx.db.delete(session._id);
+
+    const authAccounts = await ctx.db.query("authAccounts").collect();
+    for (const account of authAccounts) await ctx.db.delete(account._id);
+    
+    const users = await ctx.db.query("users").collect();
+    for (const user of users) await ctx.db.delete(user._id);
+
+    return { clearedSessions: authSessions.length, clearedAccounts: authAccounts.length, clearedUsers: users.length };
+  }
+});
+
+export const clearAuthAndUsers = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // This deletes ALL auth records and user records to fix InvalidAccountId
+    const authSessions = await ctx.db.query("authSessions").collect();
+    for (const session of authSessions) await ctx.db.delete(session._id);
+
+    const authAccounts = await ctx.db.query("authAccounts").collect();
+    for (const account of authAccounts) await ctx.db.delete(account._id);
+    
+    const users = await ctx.db.query("users").collect();
+    for (const user of users) await ctx.db.delete(user._id);
+
+    return { clearedSessions: authSessions.length, clearedAccounts: authAccounts.length, clearedUsers: users.length };
+  }
+});
+
+export const dumpAuth = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("authAccounts").collect();
+  }
+});
+
 export const seedDemoEvents = mutation({
   args: {},
   handler: async (ctx) => {
@@ -255,38 +309,6 @@ export const seedDemoEvents = mutation({
       cleanedEvents += 1;
     }
 
-    for (const email of demoEmails) {
-      const users = await ctx.db
-        .query("users")
-        .withIndex("email", (queryBuilder) => queryBuilder.eq("email", email))
-        .take(10);
-
-      for (const user of users) {
-        await ctx.db.delete(user._id);
-        cleanedUsers += 1;
-      }
-    }
-
-    const demoAdmin =
-      (
-        await ctx.db
-          .query("users")
-          .withIndex("email", (queryBuilder) =>
-            queryBuilder.eq("email", "demo.admin@example.com"),
-          )
-          .take(1)
-      )[0] ??
-      (await ctx.db.insert("users", {
-        name: "Demo Admin",
-        email: "demo.admin@example.com",
-        role: "admin",
-        createdAt: now,
-        updatedAt: now,
-      }));
-
-    const adminId =
-      typeof demoAdmin === "string" ? demoAdmin : demoAdmin._id;
-
     const characterIdsByName = new Map<string, Id<"characters">>();
     for (const character of defaultCharacters) {
       const existingCharacter = (
@@ -318,8 +340,39 @@ export const seedDemoEvents = mutation({
       characterIdsByName.set(character.name, characterId);
     }
 
+    let demoAdmin = (
+      await ctx.db
+        .query("users")
+        .withIndex("email", (queryBuilder) =>
+          queryBuilder.eq("email", "demo.admin@example.com"),
+        )
+        .take(1)
+    )[0];
+
+    if (demoAdmin) {
+      await ctx.db.patch(demoAdmin._id, {
+        role: "admin",
+        selectedCharacterId: characterIdsByName.get("Drop"),
+        updatedAt: now,
+      });
+    } else {
+      const newAdminId = await ctx.db.insert("users", {
+        name: "Demo Admin",
+        email: "demo.admin@example.com",
+        role: "admin",
+        selectedCharacterId: characterIdsByName.get("Drop"),
+        createdAt: now,
+        updatedAt: now,
+      });
+      demoAdmin = await ctx.db.get(newAdminId) as any;
+    }
+
+    const adminId = demoAdmin!._id;
+
     const publicUserIdsByEmail = new Map<string, Id<"users">>();
     for (const attendee of demoAttendees) {
+      const characterId = characterIdsByName.get(attendee.characterName);
+      
       const existingUser = (
         await ctx.db
           .query("users")
@@ -333,6 +386,7 @@ export const seedDemoEvents = mutation({
         await ctx.db.patch(existingUser._id, {
           name: `${attendee.firstName} ${attendee.lastName}`,
           role: "public",
+          selectedCharacterId: characterId,
           updatedAt: now,
         });
         publicUserIdsByEmail.set(attendee.email, existingUser._id);
@@ -343,6 +397,7 @@ export const seedDemoEvents = mutation({
         name: `${attendee.firstName} ${attendee.lastName}`,
         email: attendee.email,
         role: "public",
+        selectedCharacterId: characterId,
         createdAt: now,
         updatedAt: now,
       });
@@ -366,6 +421,7 @@ export const seedDemoEvents = mutation({
         attendanceStartAt: now - 60 * 60 * 1000,
         attendanceEndAt: now + 6 * 60 * 60 * 1000,
         status: "open" as const,
+        imageUrl: demoEvent.imageUrl,
         createdBy: adminId,
         updatedAt: now,
       };

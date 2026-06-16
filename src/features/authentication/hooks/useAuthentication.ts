@@ -1,5 +1,5 @@
 import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { useState } from "react";
 
 import { api } from "../../../../convex/_generated/api";
@@ -14,7 +14,6 @@ export function useAuthentication(): UseAuthenticationResult {
   const auth = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
   const currentUser = useQuery(api.users.getCurrentUser, {});
-  const setSelectedCharacter = useMutation(api.users.setSelectedCharacter);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,14 +45,14 @@ export function useAuthentication(): UseAuthenticationResult {
       formData.set("email", values.email);
       formData.set("password", values.password);
       formData.set("flow", "signUp");
+      
+      if (values.selectedCharacterId) {
+        formData.set("selectedCharacterId", values.selectedCharacterId);
+      }
 
       await signIn("password", formData);
 
-      if (!values.selectedCharacterId) {
-        throw new Error("Please select a character.");
-      }
-
-      await setSelectedCharacter({ characterId: values.selectedCharacterId });
+      // We no longer need to call setSelectedCharacter here because it's handled by the auth profile
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Sign up failed.");
     } finally {

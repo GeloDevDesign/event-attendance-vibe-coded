@@ -9,6 +9,7 @@ export interface UserRecord {
   email: string;
   role: UserRole;
   selectedCharacterId: Id<"characters"> | null;
+  selectedCharacterImageUrl?: string | null;
   createdAt: number;
   updatedAt: number;
 }

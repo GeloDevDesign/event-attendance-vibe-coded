@@ -23,6 +23,7 @@ export interface JoinedEventRecord {
   attendanceStartAt: number;
   attendanceEndAt: number;
   eventStatus: EventStatus;
+  eventImageUrl?: string;
   characterId: Id<"characters">;
   characterName: string;
   characterImageUrl: string;

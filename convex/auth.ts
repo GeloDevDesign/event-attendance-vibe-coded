@@ -8,6 +8,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       profile(params) {
         const email = String(params.email ?? "").trim().toLowerCase();
         const name = String(params.name ?? "").trim();
+        const selectedCharacterId = params.selectedCharacterId ? String(params.selectedCharacterId) : undefined;
         const now = Date.now();
 
         if (!email) {
@@ -18,6 +19,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
           email,
           name: name || email,
           role: "public",
+          selectedCharacterId: selectedCharacterId as any,
           createdAt: now,
           updatedAt: now,
         };

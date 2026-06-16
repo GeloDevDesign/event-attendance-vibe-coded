@@ -4,6 +4,7 @@ import {
   validateCharacterFormValues,
 } from "../services/characterService";
 import type { CharacterFormValues } from "../types/character.types";
+import { PixelButton } from "../../../components/PixelButton";
 
 export interface CharacterFormProps {
   initialValues?: Partial<CharacterFormValues>;
@@ -67,10 +68,11 @@ export function CharacterForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "grid", gap: "0.75rem" }}>
-      <label style={{ display: "grid", gap: "0.25rem" }}>
-        <span>Character name</span>
+    <form onSubmit={handleSubmit} className="grid gap-6">
+      <label className="grid gap-2 text-[12px] text-white">
+        <span className="uppercase tracking-wider">CHARACTER NAME</span>
         <input
+          className="w-full h-12 border-4 border-black bg-white px-3 text-[12px] text-black outline-none focus:bg-[#fff9c4] shadow-[4px_4px_0_0_#000] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0_0_#000] transition-all"
           name="name"
           value={values.name}
           onChange={(event) =>
@@ -79,9 +81,10 @@ export function CharacterForm({
           disabled={isSubmitting}
         />
       </label>
-      <label style={{ display: "grid", gap: "0.25rem" }}>
-        <span>Image URL</span>
+      <label className="grid gap-2 text-[12px] text-white">
+        <span className="uppercase tracking-wider">IMAGE URL</span>
         <input
+          className="w-full h-12 border-4 border-black bg-white px-3 text-[12px] text-black outline-none focus:bg-[#fff9c4] shadow-[4px_4px_0_0_#000] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0_0_#000] transition-all"
           name="imageUrl"
           value={values.imageUrl}
           onChange={(event) =>
@@ -90,22 +93,36 @@ export function CharacterForm({
           disabled={isSubmitting}
         />
       </label>
-      <label style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-        <input
-          type="checkbox"
-          checked={values.isActive}
-          onChange={(event) =>
-            setValues((current) => ({ ...current, isActive: event.target.checked }))
-          }
-          disabled={isSubmitting}
-        />
-        <span>Active</span>
+      <label className="flex items-center gap-3 text-[12px] text-white cursor-pointer mt-2">
+        <div className="relative flex items-center justify-center">
+          <input
+            type="checkbox"
+            className="peer appearance-none w-8 h-8 border-4 border-black bg-white shadow-[2px_2px_0_0_#000] checked:bg-[#3db5e6]"
+            checked={values.isActive}
+            onChange={(event) =>
+              setValues((current) => ({ ...current, isActive: event.target.checked }))
+            }
+            disabled={isSubmitting}
+          />
+          <span className="absolute text-white pointer-events-none opacity-0 peer-checked:opacity-100 text-[14px] font-bold" style={{ textShadow: "2px 2px 0 #000" }}>✓</span>
+        </div>
+        <span className="uppercase tracking-wider">ACTIVE</span>
       </label>
-      {error ? <p role="alert">{error}</p> : null}
-      {successMessage ? <p>{successMessage}</p> : null}
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving..." : submitLabel}
-      </button>
+      
+      {error ? (
+        <p className="border-4 border-black bg-red-500 px-3 py-3 text-[10px] leading-relaxed text-white shadow-[4px_4px_0_0_#000]" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {successMessage ? (
+        <p className="border-4 border-black bg-emerald-400 px-3 py-3 text-[10px] leading-relaxed text-black shadow-[4px_4px_0_0_#000]">
+          {successMessage}
+        </p>
+      ) : null}
+      
+      <PixelButton variant="primary" type="submit" disabled={isSubmitting} className="w-full mt-2">
+        {isSubmitting ? "SAVING..." : submitLabel}
+      </PixelButton>
     </form>
   );
 }

@@ -5,7 +5,6 @@ import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type {
   EventRegistrationRecord,
-  RegistrationFormValues,
 } from "../types/registration.types";
 
 export interface UseEventRegistrationOptions {
@@ -15,7 +14,7 @@ export interface UseEventRegistrationOptions {
 export interface UseEventRegistrationResult {
   isSubmitting: boolean;
   error: string | null;
-  submit(values: RegistrationFormValues): Promise<EventRegistrationRecord | null>;
+  submit(): Promise<EventRegistrationRecord | null>;
 }
 
 export function useEventRegistration(
@@ -28,7 +27,7 @@ export function useEventRegistration(
   return {
     isSubmitting,
     error,
-    async submit(values) {
+    async submit() {
       if (!options.eventId) {
         const message = "An event is required for registration.";
         setError(message);
@@ -41,7 +40,6 @@ export function useEventRegistration(
       try {
         return await registerForEventMutation({
           eventId: options.eventId,
-          ...values,
         });
       } catch (caughtError) {
         const message =

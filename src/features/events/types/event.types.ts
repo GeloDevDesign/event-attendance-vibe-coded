@@ -19,6 +19,7 @@ export interface EventRecord {
   attendanceStartAt: number;
   attendanceEndAt: number;
   status: EventStatus;
+  imageUrl?: string;
   createdBy: Id<"users">;
   createdAt: number;
   updatedAt: number;
@@ -35,6 +36,7 @@ export interface EventFormValues {
   attendanceStartAt: number;
   attendanceEndAt: number;
   status: EventStatus;
+  imageUrl?: string;
 }
 
 export interface UseEventsResult {

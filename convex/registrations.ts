@@ -3,34 +3,10 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 
-const registrationFields = {
-  firstName: v.string(),
-  lastName: v.string(),
-  characterId: v.id("characters"),
-};
-
 type EventRegistrationDoc = Doc<"eventRegistrations">;
 type EventDoc = Doc<"events">;
 type CharacterDoc = Doc<"characters">;
 type UserDoc = Doc<"users">;
-
-function normalizeRegistrationInput(args: {
-  firstName: string;
-  lastName: string;
-}): { firstName: string; lastName: string } {
-  const firstName = args.firstName.trim();
-  const lastName = args.lastName.trim();
-
-  if (firstName.length === 0) {
-    throw new Error("First name is required.");
-  }
-
-  if (lastName.length === 0) {
-    throw new Error("Last name is required.");
-  }
-
-  return { firstName, lastName };
-}
 
 async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx): Promise<UserDoc | null> {
   const userId = await getAuthUserId(ctx);
@@ -73,6 +49,7 @@ function toJoinedEventRecord(input: {
     attendanceStartAt: event.attendanceStartAt,
     attendanceEndAt: event.attendanceEndAt,
     eventStatus: event.status,
+    eventImageUrl: event.imageUrl,
     characterId: character._id,
     characterName: character.name,
     characterImageUrl: character.imageUrl,
@@ -139,7 +116,6 @@ async function getAcceptedRegistrationCount(
 export const registerForEvent = mutation({
   args: {
     eventId: v.id("events"),
-    ...registrationFields,
   },
   handler: async (ctx, args) => {
     const user = await getAuthenticatedUser(ctx);
@@ -156,8 +132,11 @@ export const registerForEvent = mutation({
       throw new Error("Event is not open for registration.");
     }
 
-    const normalized = normalizeRegistrationInput(args);
-    const character = await getCharacterById(ctx, args.characterId);
+    if (!user.selectedCharacterId) {
+      throw new Error("You must select a character before registering.");
+    }
+
+    const character = await getCharacterById(ctx, user.selectedCharacterId);
     if (!character.isActive) {
       throw new Error("Character must be active.");
     }
@@ -180,13 +159,17 @@ export const registerForEvent = mutation({
       throw new Error("Event capacity has been reached.");
     }
 
+    const nameParts = (user.name || "Unknown Player").trim().split(" ");
+    const firstName = nameParts[0] || "Unknown";
+    const lastName = nameParts.slice(1).join(" ") || "Player";
+
     const now = Date.now();
     const registrationId = await ctx.db.insert("eventRegistrations", {
       eventId: args.eventId,
       userId: user._id,
-      characterId: args.characterId,
-      firstName: normalized.firstName,
-      lastName: normalized.lastName,
+      characterId: user.selectedCharacterId,
+      firstName,
+      lastName,
       isAccepted: true,
       registeredAt: now,
       createdAt: now,
@@ -197,9 +180,9 @@ export const registerForEvent = mutation({
       id: registrationId,
       eventId: args.eventId,
       userId: user._id,
-      characterId: args.characterId,
-      firstName: normalized.firstName,
-      lastName: normalized.lastName,
+      characterId: user.selectedCharacterId,
+      firstName,
+      lastName,
       isAccepted: true,
       registeredAt: now,
       createdAt: now,
@@ -241,6 +224,38 @@ export const listRegistrationsByEvent = query({
       .take(100);
 
     return registrations.map(toEventRegistrationRecord);
+  },
+});
+
+export const listPublicRegistrationsByEvent = query({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, args) => {
+    const user = await getAuthenticatedUser(ctx);
+    if (!user) {
+      return [];
+    }
+
+    const registrations = await ctx.db
+      .query("eventRegistrations")
+      .withIndex("by_eventId", (queryBuilder) => queryBuilder.eq("eventId", args.eventId))
+      .order("desc")
+      .take(100);
+
+    const results = [];
+    for (const reg of registrations) {
+      const character = await ctx.db.get(reg.characterId);
+      if (character) {
+        results.push({
+          id: reg._id,
+          firstName: reg.firstName,
+          lastName: reg.lastName,
+          characterImageUrl: character.imageUrl,
+          characterName: character.name,
+        });
+      }
+    }
+
+    return results;
   },
 });
 

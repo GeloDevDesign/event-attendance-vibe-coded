@@ -15,6 +15,7 @@ type EventInput = {
   attendanceStartAt: number;
   attendanceEndAt: number;
   status: "draft" | "open" | "ongoing" | "completed" | "cancelled";
+  imageUrl?: string;
 };
 
 const eventStatusValidator = v.union(
@@ -36,6 +37,7 @@ const eventFields = {
   attendanceStartAt: v.number(),
   attendanceEndAt: v.number(),
   status: eventStatusValidator,
+  imageUrl: v.optional(v.string()),
 };
 
 async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx): Promise<Doc<"users">> {
@@ -116,6 +118,7 @@ function validateEventInput(args: EventInput): EventInput {
     attendanceStartAt: args.attendanceStartAt,
     attendanceEndAt: args.attendanceEndAt,
     status: args.status,
+    imageUrl: args.imageUrl?.trim() || undefined,
   };
 }
 
@@ -132,6 +135,7 @@ function toEventRecord(event: Doc<"events">) {
     attendanceStartAt: event.attendanceStartAt,
     attendanceEndAt: event.attendanceEndAt,
     status: event.status,
+    imageUrl: event.imageUrl,
     createdBy: event.createdBy,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,

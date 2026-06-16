@@ -16,11 +16,11 @@ export function EventList({
   canRegister = true,
 }: EventListProps): JSX.Element {
   if (events.length === 0) {
-    return <p className="rounded-lg bg-white p-5 text-slate-600">{emptyMessage}</p>;
+    return <p className="text-[10px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">{emptyMessage}</p>;
   }
 
   return (
-    <section className="grid gap-4 md:grid-cols-2">
+    <section className="grid gap-6 md:grid-cols-2">
       {events.map((event) => (
         <EventCard
           key={event.id}

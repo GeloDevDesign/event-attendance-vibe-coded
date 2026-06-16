@@ -7,7 +7,6 @@ import { api } from "../convex/_generated/api";
 import { PixelLayout } from "./components/PixelLayout";
 import { PixelButton } from "./components/PixelButton";
 import { useAuthentication } from "./features/authentication/hooks/useAuthentication";
-import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { AdminCharactersPage } from "./pages/AdminCharactersPage";
 import { AdminCreateEventPage } from "./pages/AdminCreateEventPage";
 import { AdminEventDetailsPage } from "./pages/AdminEventDetailsPage";
@@ -50,18 +49,13 @@ function SignedInHome() {
 
   return (
     <PixelLayout maxWidth="max-w-[800px]">
-      <header className="mb-8 border-b-4 border-black pb-6 flex flex-col sm:flex-row gap-6 justify-between sm:items-end">
-        <div>
-          <h1 className="text-3xl text-black mb-3 uppercase drop-shadow-[1px_1px_0_#fff]">
-            {isAdmin ? "Admin Hub" : "Player Dashboard"}
-          </h1>
-          <p className="text-[10px] text-stone-700 leading-relaxed">
-            Welcome back, {user?.name ?? "Hero"}.
-          </p>
-        </div>
-        <PixelButton variant="secondary" onClick={() => void logout()}>
-          SIGN OUT
-        </PixelButton>
+      <header className="mb-8 border-4 border-black bg-[#ebd2a9] p-6 shadow-[8px_8px_0_0_#000] text-center">
+        <h1 className="text-3xl text-black mb-3 uppercase drop-shadow-[1px_1px_0_#fff]">
+          {isAdmin ? "Admin Hub" : "Player Dashboard"}
+        </h1>
+        <p className="text-[10px] text-stone-700 leading-relaxed">
+          Welcome back, {user?.name ?? "Hero"}. Select a quick action below or use the sidebar menu.
+        </p>
       </header>
       
       {(bootstrapMessage || bootstrapError) && (

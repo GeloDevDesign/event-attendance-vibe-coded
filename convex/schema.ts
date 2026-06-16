@@ -43,6 +43,7 @@ export default defineSchema({
     attendanceStartAt: v.number(),
     attendanceEndAt: v.number(),
     status: eventStatusValidator,
+    imageUrl: v.optional(v.string()),
     createdBy: v.id("users"),
     createdAt: v.number(),
     updatedAt: v.number(),

@@ -17,12 +17,21 @@ export const getCurrentUser = query({
       return null;
     }
 
+    let selectedCharacterImageUrl = null;
+    if (user.selectedCharacterId) {
+      const character = await ctx.db.get(user.selectedCharacterId);
+      if (character) {
+        selectedCharacterImageUrl = character.imageUrl;
+      }
+    }
+
     return {
       id: user._id,
       name: user.name ?? "EventQuest User",
       email: user.email ?? "",
       role: user.role ?? "public",
       selectedCharacterId: user.selectedCharacterId ?? null,
+      selectedCharacterImageUrl,
       createdAt: user.createdAt ?? user._creationTime,
       updatedAt: user.updatedAt ?? user._creationTime,
     };

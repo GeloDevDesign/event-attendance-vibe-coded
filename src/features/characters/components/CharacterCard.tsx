@@ -2,6 +2,7 @@ import type { JSX } from "react";
 
 import type { Id } from "../../../../convex/_generated/dataModel";
 import type { CharacterRecord } from "../types/character.types";
+import { PixelButton } from "../../../components/PixelButton";
 
 export interface CharacterCardProps {
   character: CharacterRecord;
@@ -24,44 +25,48 @@ export function CharacterCard({
     <article
       aria-label={`Character ${character.name}`}
       data-selected={isSelected}
-      className={`grid gap-3 rounded-md border p-4 text-left ${
-        isSelected ? "border-emerald-700 bg-emerald-50" : "border-stone-300 bg-white"
+      className={`grid gap-3 border-4 border-black p-4 text-left shadow-[4px_4px_0_0_#000] ${
+        isSelected ? "bg-emerald-200" : "bg-white"
       }`}
     >
-      <img
-        src={character.imageUrl}
-        alt={character.name}
-        className="h-20 w-20 object-contain [image-rendering:pixelated]"
-      />
-      <div>
-        <h3 className="font-black text-slate-950">{character.name}</h3>
-        <p className="text-sm text-slate-600">{statusLabel}</p>
+      <div className="bg-[#111] border-4 border-black rounded-lg w-[80px] h-[80px] flex items-center justify-center shadow-[inset_2px_2px_0_rgba(0,0,0,0.5)]">
+        <img
+          src={character.imageUrl}
+          alt={character.name}
+          className="h-16 w-16 object-contain [image-rendering:pixelated]"
+        />
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div>
+        <h3 className="text-[12px] text-black uppercase drop-shadow-[1px_1px_0_#fff] leading-snug">{character.name}</h3>
+        <p className="text-[10px] text-stone-600 mt-1 uppercase">{statusLabel}</p>
+      </div>
+      <div className="flex flex-wrap gap-2 mt-2">
         {onSelect ? (
-          <button
-            className="rounded-md bg-emerald-950 px-3 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          <PixelButton
+            variant={isSelected ? "accent" : "primary"}
+            className="!w-auto !min-h-[40px] !px-3"
             type="button"
             onClick={() => onSelect(character.id)}
             disabled={!character.isActive}
             aria-pressed={isSelected}
           >
-            {isSelected ? "Selected" : "Select"}
-          </button>
+            {isSelected ? "SELECTED" : "SELECT"}
+          </PixelButton>
         ) : null}
         {onEdit ? (
-          <button className="rounded-md border border-stone-300 px-3 py-2 text-sm font-bold" type="button" onClick={() => onEdit(character)}>
-            Edit
-          </button>
+          <PixelButton variant="secondary" className="!w-auto !min-h-[40px] !px-3" type="button" onClick={() => onEdit(character)}>
+            EDIT
+          </PixelButton>
         ) : null}
         {onToggleActive ? (
-          <button
-            className="rounded-md border border-stone-300 px-3 py-2 text-sm font-bold"
+          <PixelButton
+            variant="secondary"
+            className="!w-auto !min-h-[40px] !px-3"
             type="button"
             onClick={() => onToggleActive(character.id, !character.isActive)}
           >
-            {character.isActive ? "Deactivate" : "Activate"}
-          </button>
+            {character.isActive ? "DEACTIVATE" : "ACTIVATE"}
+          </PixelButton>
         ) : null}
       </div>
     </article>

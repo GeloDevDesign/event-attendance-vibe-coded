@@ -21,15 +21,21 @@ export interface EventMapLocation {
   locationName: string;
 }
 
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  accuracyMeters: number;
+  characterImageUrl?: string;
+  isCurrentUser?: boolean;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface AttendanceMapProps {
   event: EventMapLocation;
   attendee?: MapAttendee;
-  userLocation?: {
-    latitude: number;
-    longitude: number;
-    accuracyMeters: number;
-    characterImageUrl?: string;
-  };
+  userLocation?: UserLocation;
+  otherUsers?: UserLocation[];
 }
 
 export interface AdminAttendanceMapProps {
