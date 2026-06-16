@@ -5,6 +5,9 @@ export interface RegistrationStatusBadgeProps {
 }
 
 export function RegistrationStatusBadge(props: RegistrationStatusBadgeProps): JSX.Element {
-  void props;
-  return <></>;
+  return (
+    <span aria-label={props.isAccepted ? "Accepted registration" : "Pending registration"}>
+      {props.isAccepted ? "Accepted" : "Pending"}
+    </span>
+  );
 }
