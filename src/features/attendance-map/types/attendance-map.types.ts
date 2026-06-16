@@ -24,8 +24,15 @@ export interface EventMapLocation {
 export interface AttendanceMapProps {
   event: EventMapLocation;
   attendee?: MapAttendee;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+    accuracyMeters: number;
+    characterImageUrl?: string;
+  };
 }
 
 export interface AdminAttendanceMapProps {
   eventId: Id<"events">;
+  event: EventMapLocation;
 }

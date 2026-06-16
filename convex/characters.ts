@@ -1,3 +1,4 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
@@ -7,6 +8,15 @@ const characterFields = {
   imageUrl: v.string(),
   isActive: v.boolean(),
 };
+
+const defaultCharacters = [
+  { name: "Drop", imageUrl: "/Characters/Drop_Idle.gif" },
+  { name: "Ghosts", imageUrl: "/Characters/Ghosts_idle.gif" },
+  { name: "Grandpa", imageUrl: "/Characters/Grandpa_idle.gif" },
+  { name: "Mouth", imageUrl: "/Characters/Mouth_idle.gif" },
+  { name: "Robo", imageUrl: "/Characters/Robo_idle.gif" },
+  { name: "Skull", imageUrl: "/Characters/Skull_idle.gif" },
+] as const;
 
 function normalizeCharacterInput(args: { name: string; imageUrl: string }) {
   const name = args.name.trim();
@@ -26,18 +36,13 @@ function normalizeCharacterInput(args: { name: string; imageUrl: string }) {
 async function getAuthenticatedUser(
   ctx: QueryCtx | MutationCtx,
 ): Promise<Doc<"users">> {
-  const identity = await ctx.auth.getUserIdentity();
+  const userId = await getAuthUserId(ctx);
 
-  if (!identity) {
+  if (!userId) {
     throw new Error("Authentication is required.");
   }
 
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_tokenIdentifier", (queryBuilder) =>
-      queryBuilder.eq("tokenIdentifier", identity.tokenIdentifier),
-    )
-    .unique();
+  const user = await ctx.db.get(userId);
 
   if (!user) {
     throw new Error("Authenticated user was not found.");
@@ -141,5 +146,45 @@ export const setCharacterActiveState = mutation({
     });
 
     return args.characterId;
+  },
+});
+
+export const seedDefaultCharacters = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await requireAdmin(ctx);
+
+    const now = Date.now();
+    const seededCharacterIds = [];
+
+    for (const character of defaultCharacters) {
+      const existingCharacter = await ctx.db
+        .query("characters")
+        .withIndex("by_name", (queryBuilder) =>
+          queryBuilder.eq("name", character.name),
+        )
+        .unique();
+
+      if (existingCharacter) {
+        await ctx.db.patch(existingCharacter._id, {
+          imageUrl: character.imageUrl,
+          isActive: true,
+          updatedAt: now,
+        });
+        seededCharacterIds.push(existingCharacter._id);
+        continue;
+      }
+
+      const characterId = await ctx.db.insert("characters", {
+        name: character.name,
+        imageUrl: character.imageUrl,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      });
+      seededCharacterIds.push(characterId);
+    }
+
+    return seededCharacterIds;
   },
 });

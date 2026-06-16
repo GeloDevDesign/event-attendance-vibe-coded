@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type JSX } from "react";
 
 import type { CharacterRecord } from "../../characters/types/character.types";
+import { CharacterSelector } from "../../characters/components/CharacterSelector";
 import { validateRegistrationFormValues } from "../services/registrationService";
 import type {
   EventRegistrationFormProps,
@@ -81,22 +82,14 @@ export function EventRegistrationForm(props: EventRegistrationFormProps): JSX.El
         />
       </label>
 
-      <label>
-        <span>Character</span>
-        <select
-          name="characterId"
-          value={characterId}
-          onChange={(changeEvent) =>
-            setCharacterId(changeEvent.target.value as CharacterRecord["id"])
-          }
-        >
-          {characters.map((character) => (
-            <option key={character.id} value={character.id}>
-              {character.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <section aria-label="Character selection">
+        <p className="mb-3 text-sm font-black text-slate-800">Character</p>
+        <CharacterSelector
+          characters={characters}
+          selectedCharacterId={characterId || undefined}
+          onSelect={setCharacterId}
+        />
+      </section>
 
       {formError ? <p role="alert">{formError}</p> : null}
       {error ? <p role="alert">{error}</p> : null}

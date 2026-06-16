@@ -24,31 +24,23 @@ export function CharacterCard({
     <article
       aria-label={`Character ${character.name}`}
       data-selected={isSelected}
-      style={{
-        border: "1px solid #d1d5db",
-        borderRadius: "0.75rem",
-        padding: "1rem",
-        display: "grid",
-        gap: "0.75rem",
-      }}
+      className={`grid gap-3 rounded-md border p-4 text-left ${
+        isSelected ? "border-emerald-700 bg-emerald-50" : "border-stone-300 bg-white"
+      }`}
     >
       <img
         src={character.imageUrl}
         alt={character.name}
-        style={{
-          width: "100%",
-          maxWidth: "9rem",
-          aspectRatio: "1 / 1",
-          objectFit: "contain",
-        }}
+        className="h-20 w-20 object-contain [image-rendering:pixelated]"
       />
       <div>
-        <h3 style={{ margin: 0 }}>{character.name}</h3>
-        <p style={{ margin: "0.25rem 0 0", color: "#4b5563" }}>{statusLabel}</p>
+        <h3 className="font-black text-slate-950">{character.name}</h3>
+        <p className="text-sm text-slate-600">{statusLabel}</p>
       </div>
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+      <div className="flex flex-wrap gap-2">
         {onSelect ? (
           <button
+            className="rounded-md bg-emerald-950 px-3 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             onClick={() => onSelect(character.id)}
             disabled={!character.isActive}
@@ -58,12 +50,13 @@ export function CharacterCard({
           </button>
         ) : null}
         {onEdit ? (
-          <button type="button" onClick={() => onEdit(character)}>
+          <button className="rounded-md border border-stone-300 px-3 py-2 text-sm font-bold" type="button" onClick={() => onEdit(character)}>
             Edit
           </button>
         ) : null}
         {onToggleActive ? (
           <button
+            className="rounded-md border border-stone-300 px-3 py-2 text-sm font-bold"
             type="button"
             onClick={() => onToggleActive(character.id, !character.isActive)}
           >

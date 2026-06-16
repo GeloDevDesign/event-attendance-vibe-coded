@@ -4,10 +4,11 @@ export type UserRole = "admin" | "public";
 
 export interface UserRecord {
   id: Id<"users">;
-  tokenIdentifier: string;
+  tokenIdentifier?: string;
   name: string;
   email: string;
   role: UserRole;
+  selectedCharacterId: Id<"characters"> | null;
   createdAt: number;
   updatedAt: number;
 }

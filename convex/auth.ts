@@ -1,5 +1,27 @@
+import { Password } from "@convex-dev/auth/providers/Password";
 import { convexAuth } from "@convex-dev/auth/server";
+import type { DataModel } from "./_generated/dataModel";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [],
+  providers: [
+    Password<DataModel>({
+      profile(params) {
+        const email = String(params.email ?? "").trim().toLowerCase();
+        const name = String(params.name ?? "").trim();
+        const now = Date.now();
+
+        if (!email) {
+          throw new Error("Email is required.");
+        }
+
+        return {
+          email,
+          name: name || email,
+          role: "public",
+          createdAt: now,
+          updatedAt: now,
+        };
+      },
+    }),
+  ],
 });

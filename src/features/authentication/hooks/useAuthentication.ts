@@ -1,21 +1,80 @@
+import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
+import { useMutation, useQuery } from "convex/react";
+import { useState } from "react";
+
+import { api } from "../../../../convex/_generated/api";
 import { createConvexAuthState } from "../services/authenticationService";
-import type { UseAuthenticationResult } from "../types/authentication.types";
+import type {
+  LoginFormValues,
+  RegisterAccountFormValues,
+  UseAuthenticationResult,
+} from "../types/authentication.types";
 
 export function useAuthentication(): UseAuthenticationResult {
+  const auth = useConvexAuth();
+  const { signIn, signOut } = useAuthActions();
+  const currentUser = useQuery(api.users.getCurrentUser, {});
+  const setSelectedCharacter = useMutation(api.users.setSelectedCharacter);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function login(values: LoginFormValues) {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.set("email", values.email);
+      formData.set("password", values.password);
+      formData.set("flow", "signIn");
+
+      await signIn("password", formData);
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Sign in failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function register(values: RegisterAccountFormValues) {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.set("name", values.name);
+      formData.set("email", values.email);
+      formData.set("password", values.password);
+      formData.set("flow", "signUp");
+
+      await signIn("password", formData);
+
+      if (!values.selectedCharacterId) {
+        throw new Error("Please select a character.");
+      }
+
+      await setSelectedCharacter({ characterId: values.selectedCharacterId });
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Sign up failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function logout() {
+    setError(null);
+    await signOut();
+  }
+
   return {
-    user: null,
-    isLoading: false,
-    isAuthenticated: false,
-    error: null,
-    async login() {
-      return;
-    },
-    async register() {
-      return;
-    },
-    async logout() {
-      return;
-    },
-    auth: createConvexAuthState(),
+    user: currentUser ?? null,
+    isLoading: auth.isLoading || currentUser === undefined,
+    isAuthenticated: auth.isAuthenticated,
+    error,
+    isSubmitting,
+    login,
+    register,
+    logout,
+    auth: createConvexAuthState(auth),
   };
 }

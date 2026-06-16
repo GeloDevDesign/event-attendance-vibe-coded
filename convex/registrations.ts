@@ -1,3 +1,4 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
@@ -32,18 +33,13 @@ function normalizeRegistrationInput(args: {
 }
 
 async function getAuthenticatedUser(ctx: QueryCtx | MutationCtx): Promise<UserDoc | null> {
-  const identity = await ctx.auth.getUserIdentity();
+  const userId = await getAuthUserId(ctx);
 
-  if (!identity) {
+  if (!userId) {
     return null;
   }
 
-  return await ctx.db
-    .query("users")
-    .withIndex("by_tokenIdentifier", (queryBuilder) =>
-      queryBuilder.eq("tokenIdentifier", identity.tokenIdentifier),
-    )
-    .unique();
+  return await ctx.db.get(userId);
 }
 
 function toEventRegistrationRecord(registration: EventRegistrationDoc) {
@@ -149,6 +145,10 @@ export const registerForEvent = mutation({
     const user = await getAuthenticatedUser(ctx);
     if (!user) {
       throw new Error("Authentication is required.");
+    }
+
+    if (user.role === "admin") {
+      throw new Error("Admins cannot register for events.");
     }
 
     const event = await getEventById(ctx, args.eventId);

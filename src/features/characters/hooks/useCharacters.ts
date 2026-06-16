@@ -28,6 +28,7 @@ export interface UseCharactersResult {
   setCharacterActiveState(
     values: SetCharacterActiveStateValues,
   ): Promise<Id<"characters">>;
+  seedDefaultCharacters(): Promise<Id<"characters">[]>;
 }
 
 function toCharacterRecord(character: Doc<"characters">): CharacterRecord {
@@ -54,6 +55,7 @@ export function useCharacters(options: UseCharactersOptions = {}): UseCharacters
   const setCharacterActiveStateMutation = useMutation(
     api.characters.setCharacterActiveState,
   );
+  const seedDefaultCharactersMutation = useMutation(api.characters.seedDefaultCharacters);
 
   const characterRecords = (rawCharacters ?? []).map(toCharacterRecord);
   const characters = sortCharactersByName(
@@ -73,6 +75,9 @@ export function useCharacters(options: UseCharactersOptions = {}): UseCharacters
     },
     async setCharacterActiveState(values) {
       return await setCharacterActiveStateMutation(values);
+    },
+    async seedDefaultCharacters() {
+      return await seedDefaultCharactersMutation({});
     },
   };
 }

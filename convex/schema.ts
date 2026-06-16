@@ -1,3 +1,4 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -12,15 +13,23 @@ const eventStatusValidator = v.union(
 const userRoleValidator = v.union(v.literal("admin"), v.literal("public"));
 
 export default defineSchema({
+  ...authTables,
   users: defineTable({
-    tokenIdentifier: v.string(),
-    name: v.string(),
-    email: v.string(),
-    role: userRoleValidator,
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    tokenIdentifier: v.optional(v.string()),
+    role: v.optional(userRoleValidator),
+    selectedCharacterId: v.optional(v.id("characters")),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
   })
-    .index("by_email", ["email"])
+    .index("email", ["email"])
+    .index("phone", ["phone"])
     .index("by_tokenIdentifier", ["tokenIdentifier"])
     .index("by_role", ["role"]),
   events: defineTable({

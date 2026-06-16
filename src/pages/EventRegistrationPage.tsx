@@ -1,10 +1,12 @@
 import { useState, type JSX } from "react";
+import { useParams } from "react-router-dom";
 
 import { useCharacters } from "../features/characters/hooks/useCharacters";
 import { EventRegistrationForm } from "../features/registrations/components/EventRegistrationForm";
 import { useEventRegistration } from "../features/registrations/hooks/useEventRegistration";
 import type { Id } from "../../convex/_generated/dataModel";
 import type { EventRegistrationRecord } from "../features/registrations/types/registration.types";
+import { PixelLayout } from "../components/PixelLayout";
 
 export interface EventRegistrationPageProps {
   eventId?: Id<"events">;
@@ -14,9 +16,11 @@ export interface EventRegistrationPageProps {
 export function EventRegistrationPage(
   props: EventRegistrationPageProps = {},
 ): JSX.Element {
+  const params = useParams();
+  const eventId = props.eventId ?? (params.eventId as Id<"events"> | undefined);
   const { characters, isLoading, error, isEmpty } = useCharacters({ scope: "active" });
   const { isSubmitting, error: submitError, submit } = useEventRegistration({
-    eventId: props.eventId,
+    eventId,
   });
   const [pageMessage, setPageMessage] = useState<string | null>(null);
 
@@ -26,31 +30,49 @@ export function EventRegistrationPage(
     );
   }
 
-  if (!props.eventId) {
-    return <p>Select an event before registering.</p>;
+  if (!eventId) {
+    return (
+      <PixelLayout>
+        <p className="text-[10px] text-red-500">Select an event before registering.</p>
+      </PixelLayout>
+    );
   }
 
   if (isLoading) {
-    return <p>Loading active characters...</p>;
+    return (
+      <PixelLayout>
+        <p className="text-[10px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">Loading active characters...</p>
+      </PixelLayout>
+    );
   }
 
   if (error) {
-    return <p role="alert">{error}</p>;
+    return (
+      <PixelLayout>
+        <p className="text-[10px] border-4 border-black bg-red-500 text-white p-4 shadow-[4px_4px_0_0_#000]" role="alert">{error}</p>
+      </PixelLayout>
+    );
   }
 
   if (isEmpty) {
-    return <p>No active characters are available yet.</p>;
+    return (
+      <PixelLayout>
+        <p className="text-[10px] border-4 border-black bg-white p-4 shadow-[4px_4px_0_0_#000]">No active characters are available yet.</p>
+      </PixelLayout>
+    );
   }
 
   return (
-    <main style={{ display: "grid", gap: "1.5rem" }}>
-      <header>
-        <h1>Event Registration</h1>
-        <p>Choose your name and active character to join this event.</p>
+    <PixelLayout maxWidth="max-w-[800px]">
+      <header className="mb-6">
+        <h1 className="text-2xl text-black mb-2 uppercase drop-shadow-[1px_1px_0_#fff]">Event Registration</h1>
+        <p className="text-[10px] text-stone-700 leading-relaxed">
+          Choose your name and active character to join this event.
+        </p>
       </header>
-      {pageMessage ? <p>{pageMessage}</p> : null}
+      {pageMessage ? <p className="border-4 border-black bg-[#3db5e6] px-3 py-3 text-[10px] leading-relaxed text-white shadow-[4px_4px_0_0_#000] mb-6">{pageMessage}</p> : null}
       <EventRegistrationForm
-        eventId={props.eventId}
+        eventId={eventId}
         eventName={props.eventName}
         characters={characters}
         isSubmitting={isSubmitting}
@@ -58,6 +80,6 @@ export function EventRegistrationPage(
         onSubmit={submit}
         onSuccess={handleSuccess}
       />
-    </main>
+    </PixelLayout>
   );
 }
