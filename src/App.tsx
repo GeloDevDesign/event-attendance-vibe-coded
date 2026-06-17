@@ -5,7 +5,6 @@ import { Link, Navigate, Route, Routes } from "react-router-dom";
 
 import { api } from "../convex/_generated/api";
 import { PixelLayout } from "./components/PixelLayout";
-import { PixelButton } from "./components/PixelButton";
 import { useAuthentication } from "./features/authentication/hooks/useAuthentication";
 import { AdminCharactersPage } from "./pages/AdminCharactersPage";
 import { AdminCreateEventPage } from "./pages/AdminCreateEventPage";
@@ -20,7 +19,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { RegisterAccountPage } from "./pages/RegisterAccountPage";
 
 function SignedInHome() {
-  const { user, logout } = useAuthentication();
+  const { user } = useAuthentication();
   const bootstrapAdmin = useMutation(api.seed.bootstrapCurrentUserAsAdmin);
   const [bootstrapMessage, setBootstrapMessage] = useState<string | null>(null);
   const [bootstrapError, setBootstrapError] = useState<string | null>(null);

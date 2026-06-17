@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 const defaultCharacters = [
   { name: "Drop", imageUrl: "/Characters/Drop_Idle.gif" },
@@ -212,23 +212,6 @@ export const seedDefaultData = mutation({
       },
     };
   },
-});
-
-export const clearAuthAndUsers = mutation({
-  args: {},
-  handler: async (ctx) => {
-    // This deletes ALL auth records and user records to fix InvalidAccountId
-    const authSessions = await ctx.db.query("authSessions").collect();
-    for (const session of authSessions) await ctx.db.delete(session._id);
-
-    const authAccounts = await ctx.db.query("authAccounts").collect();
-    for (const account of authAccounts) await ctx.db.delete(account._id);
-    
-    const users = await ctx.db.query("users").collect();
-    for (const user of users) await ctx.db.delete(user._id);
-
-    return { clearedSessions: authSessions.length, clearedAccounts: authAccounts.length, clearedUsers: users.length };
-  }
 });
 
 export const clearAuthAndUsers = mutation({

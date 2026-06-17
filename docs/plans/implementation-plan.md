@@ -42,7 +42,7 @@ Set up the approved authentication foundation so users can sign in, register, si
 - `src/types/user.types.ts`
 - `src/pages/LoginPage.tsx`
 - `src/pages/RegisterAccountPage.tsx`
-
+ 
 ### Backend Work
 
 - Finalize Convex auth configuration.

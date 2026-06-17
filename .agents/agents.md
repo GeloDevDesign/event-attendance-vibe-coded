@@ -138,13 +138,13 @@ Read instructions
 - A requested file would overwrite real implementation.
 - A new dependency appears necessary.
 
-## Never Do
+ ## Never Do
 
-- Never implement business logic.
-- Never overwrite existing implementations.
-- Never install packages.
-- Never create unapproved folders.
-- Never modify authentication automatically.
+ - Never implement business logic.
+ - Never overwrite existing implementations.
+ - Never install packages.
+ - Never create unapproved folders.
+ - Never modify authentication automatically.
 
 # 2. Event Management Agent
 
